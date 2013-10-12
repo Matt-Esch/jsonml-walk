@@ -10,15 +10,12 @@
 
 <!-- [![browser support][11]][12] -->
 
-Walk a jsonml
+Walk a loose jsonml tree with hooks
 
 ## Example
 
 ```js
 var walk = require("jsonml-walk")
-
-// Log all tag names pre-order
-var walk = require("./index.js")
 var console = require("console")
 
 // Log all tag names pre-order
