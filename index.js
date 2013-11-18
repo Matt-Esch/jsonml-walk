@@ -57,7 +57,7 @@ function Walker(options) {
 
         if (isArray) {
             if (onNormalize) {
-                tree = onNormalize(tree)
+                tree = onNormalize(tree, opts)
             }
 
             var selector = tree[0]
