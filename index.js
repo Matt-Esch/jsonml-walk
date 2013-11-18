@@ -76,7 +76,7 @@ function Walker(options) {
             }
 
             if (onNodeAfter) {
-                context = onNodeAfter(opts, selector, properties, children)
+                onNodeAfter(opts, selector, properties, children)
             }
             return context
         } else if (isPrimitive(tree, isArray)) {
