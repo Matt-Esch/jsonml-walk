@@ -25,7 +25,7 @@ var samplePage = ["html", {}, [
     ]]
 ]]
 
-var pluginTree = ["div", {}, [
+var primitiveTree = ["div", {}, [
     { color: "red", primitive: "color", elem: ["span", {}, [
         ["#text", { value: "red" }, []]
     ]] },
@@ -151,36 +151,36 @@ test("can build dom tree", function (assert) {
     }
 })
 
-test("can parse plugins", function (assert) {
-    var stringifyAndPlugin = Walker({
+test("can parse primitives", function (assert) {
+    var stringifyAndPrimitive = Walker({
         onNode: function (opts, selector) {
             return appendContext(opts, "<" + selector + ">")
         },
         onNodeAfter: function (opts, selector) {
             return appendContext(opts, "</" + selector + ">")
         },
-        onPlugin: function (opts, tree) {
-            var plugins = opts.plugins
-            var plugin = plugins[tree.primitive]
+        onPrimitive: function (opts, tree) {
+            var primitives = opts.primitives
+            var primitive = primitives[tree.primitive]
 
-            return plugin(opts, tree)
+            return primitive(opts, tree)
         },
         createContext: function () {
             return []
         }
     })
 
-    var plugins = { color: function (opts, tree) {
+    var primitives = { color: function (opts, tree) {
         var elem = tree.elem
         var color = tree.color
 
-        return stringifyAndPlugin(["span." + color, {}, [
+        return stringifyAndPrimitive(["span." + color, {}, [
             elem
         ]], opts)
     } }
 
-    var tree = stringifyAndPlugin(pluginTree, {
-        plugins: plugins
+    var tree = stringifyAndPrimitive(primitiveTree, {
+        primitives: primitives
     }).join("")
 
     assert.equal(tree, "<div>" +

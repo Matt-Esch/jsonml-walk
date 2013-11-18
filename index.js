@@ -21,9 +21,9 @@ module.exports = Walker
             properties: Object,
             children: Array<JsonML>
         ) => ContextT,
-        onPlugin: (
+        onPrimitive: (
             options: WalkerOptions<ContextT, OptionsT>,
-            plugin: Object
+            primitive: Object
         ) => ContextT,
         createContext: (
             options: WalkerOptions<ContextT, OptionsT>,
@@ -33,7 +33,7 @@ module.exports = Walker
 
 */
 function Walker(options) {
-    var onPlugin = options.onPlugin
+    var onPrimitive = options.onPrimitive
     var onNode = options.onNode
     var onNodeAfter = options.onNodeAfter
     var createContext = options.createContext
@@ -74,15 +74,15 @@ function Walker(options) {
                 context = onNodeAfter(opts, selector, properties, children)
             }
             return context
-        } else if (isPlugin(tree, isArray)) {
-            return onPlugin(opts, tree)
+        } else if (isPrimitive(tree, isArray)) {
+            return onPrimitive(opts, tree)
         } else {
             throw new Error("invalid JsonML tree: " + JSON.stringify(tree))
         }
     }
 }
 
-function isPlugin(obj, isArray) {
+function isPrimitive(obj, isArray) {
     return !isArray && (isObject(obj) || typeof obj === "function")
 }
 
