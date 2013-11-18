@@ -37,6 +37,7 @@ function Walker(options) {
     var onNode = options.onNode
     var onNodeAfter = options.onNodeAfter
     var createContext = options.createContext
+    var onNormalize = options.onNormalize
 
     return walker
 
@@ -55,6 +56,10 @@ function Walker(options) {
         var isArray = Array.isArray(tree)
 
         if (isArray) {
+            if (onNormalize) {
+                tree = onNormalize(tree)
+            }
+
             var selector = tree[0]
             var properties = tree[1]
             var children = tree[2]

@@ -12,6 +12,14 @@ var smallSample = ["div", {}, [
         ]]
     ]]
 ]]
+
+var smallTerseSample = ["div", [
+    ["p", [
+        ["span", "hello"],
+        ["b", "world"]
+    ]]
+]]
+
 var samplePage = ["html", {}, [
     ["head", { className: "head" }, [
         ["meta", { charset: "utf-8" }, []],
@@ -188,6 +196,48 @@ test("can parse primitives", function (assert) {
         "<span.blue><span><#text></#text></span></span.blue>" +
         "<span.green><span><#text></#text></span></span.green>" +
         "</div>")
+
+    assert.end()
+})
+
+test("can normalize", function (assert) {
+    var countTagNames = Walker({
+        onNode: function (opts, selector) {
+            return appendContext(opts, selector)
+        },
+        onNormalize: function (triplet) {
+            var properties = triplet[1]
+            var children = triplet[2]
+
+            if (Array.isArray(properties)) {
+                children = properties
+                properties = {}
+            }
+
+            if (typeof properties === "string") {
+                var value = properties
+                properties = {}
+                children = [["#text", { value: value }, []]]
+            }
+
+            if (!children) {
+                children = []
+            }
+            if (!properties) {
+                properties = {}
+            }
+
+            return [triplet[0], properties, children]
+        },
+        createContext: function () {
+            return []
+        }
+    })
+
+
+    var tagNames = countTagNames(smallTerseSample)
+
+    assert.deepEqual(tagNames, ["div", "p", "span", "#text", "b", "#text"])
 
     assert.end()
 })
