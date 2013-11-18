@@ -10,20 +10,24 @@ module.exports = Walker
 
     Walker := ({
         onNode: (
+            options: WalkerOptions<ContextT, OptionsT>,
             selector: String,
             properties: Object,
-            children: Array<JsonML>,
-            options: WalkerOptions<ContextT, OptionsT>
+            children: Array<JsonML>
         ) => ContextT,
         onNodeAfter: (
+            options: WalkerOptions<ContextT, OptionsT>,
             selector: String,
             properties: Object,
-            children: Array<JsonML>,
-            options: WalkerOptions<ContextT, OptionsT>
+            children: Array<JsonML>
         ) => ContextT,
         onPlugin: (
-            plugin: Object, 
-            options: WalkerOptions<ContextT, OptionsT>
+            options: WalkerOptions<ContextT, OptionsT>,
+            plugin: Object
+        ) => ContextT,
+        createContext: (
+            options: WalkerOptions<ContextT, OptionsT>,
+            tree: JsonML
         ) => ContextT
     }) => (tree: JsonML, options: OptionsT) => ContextT
 
@@ -40,8 +44,9 @@ function Walker(options) {
         opts = opts || {}
 
         if (!opts.parent) {
-            var context = createContext ? createContext(tree, opts) : null
-            opts.parent = { context: context, tree: null }
+            var initialContext = createContext ?
+                createContext(opts, tree) : null
+            opts.parent = { context: initialContext, tree: null }
         }
         if (!opts.parents) {
             opts.parents = []
@@ -54,7 +59,7 @@ function Walker(options) {
             var properties = tree[1]
             var children = tree[2]
 
-            var context = onNode(selector, properties, children, opts)
+            var context = onNode(opts, selector, properties, children)
             var parent = { context: context, tree: tree }
             var childOpts = extend(opts, {
                 parent: parent,
@@ -66,11 +71,11 @@ function Walker(options) {
             }
 
             if (onNodeAfter) {
-                context = onNodeAfter(selector, properties, children, opts)
+                context = onNodeAfter(opts, selector, properties, children)
             }
             return context
         } else if (isPlugin(tree, isArray)) {
-            return onPlugin(tree, opts)
+            return onPlugin(opts, tree)
         } else {
             throw new Error("invalid JsonML tree: " + JSON.stringify(tree))
         }
