@@ -1,50 +1,86 @@
-var normalize = require("./normalize.js")
-var isArray = require("./lib/is-array.js")
-var isObject = require("./lib/is-object.js")
-var isString = require("./lib/is-string.js")
+var extend = require("xtend")
 
-module.exports = walk
+module.exports = Walker
 
-function walk(node, opts) {
-    opts = opts || {}
-    var beforeAll = opts.beforeAll
-    var afterAll = opts.afterAll
-    beforeAll && beforeAll(node, opts)
-    recursiveWalk(node, opts)
-    afterAll && afterAll(node, opts)
+/*  
+    type WalkerOptions<ContextT, OptionsT> := OptionsT & {
+        parent: null | { context: ContextT, tree: JsonML },
+        parents: Array<{ context: ContextT, tree: JsonML }>
+    }
+
+    Walker := ({
+        onNode: (
+            selector: String,
+            properties: Object,
+            children: Array<JsonML>,
+            options: WalkerOptions<ContextT, OptionsT>
+        ) => ContextT,
+        onNodeAfter: (
+            selector: String,
+            properties: Object,
+            children: Array<JsonML>,
+            options: WalkerOptions<ContextT, OptionsT>
+        ) => ContextT,
+        onPlugin: (
+            plugin: Object, 
+            options: WalkerOptions<ContextT, OptionsT>
+        ) => ContextT
+    }) => (tree: JsonML, options: OptionsT) => ContextT
+
+*/
+function Walker(options) {
+    var onPlugin = options.onPlugin
+    var onNode = options.onNode
+    var onNodeAfter = options.onNodeAfter
+    var createContext = options.createContext
+
+    return walker
+
+    function walker(tree, opts) {
+        opts = opts || {}
+
+        if (!opts.parent) {
+            var context = createContext ? createContext(tree, opts) : null
+            opts.parent = { context: context, tree: null }
+        }
+        if (!opts.parents) {
+            opts.parents = []
+        }
+
+        var isArray = Array.isArray(tree)
+
+        if (isArray) {
+            var selector = tree[0]
+            var properties = tree[1]
+            var children = tree[2]
+
+            var context = onNode(selector, properties, children, opts)
+            var parent = { context: context, tree: tree }
+            var childOpts = extend(opts, {
+                parent: parent,
+                parents: opts.parents.concat(parent)
+            })
+
+            for (var i = 0; i < children.length; i++) {
+                walker(children[i], childOpts)
+            }
+
+            if (onNodeAfter) {
+                context = onNodeAfter(selector, properties, children, opts)
+            }
+            return context
+        } else if (isPlugin(tree, isArray)) {
+            return onPlugin(tree, opts)
+        } else {
+            throw new Error("invalid JsonML tree: " + JSON.stringify(tree))
+        }
+    }
 }
 
-function recursiveWalk(node, opts) {
-    var parents = opts.parents || (opts.parents = [])
-    var before = opts.before
-    var after = opts.after
-    var plugin = opts.plugin
-    var textNode = opts.textNode
+function isPlugin(obj, isArray) {
+    return !isArray && (isObject(obj) || typeof obj === "function")
+}
 
-    if (!isArray(node)) {
-        if (isObject(node)) {
-            return plugin && plugin(node, opts)
-        } else if (isString(node)) {
-            return textNode && textNode(node)
-        } else {
-            throw new Error("Invalid node type")
-        }
-    }
-
-    var normal = normalize(node)
-    var children = normal.children
-
-    // Process the head
-    before && before(normal, opts)
-
-    // Process the children
-    if (children.length > 0) {
-        parents.unshift(node)
-        for (var i = 0; i < children.length; i += 1) {
-            recursiveWalk(children[i], opts)
-        }
-        parents.shift()
-    }
-
-    after && after(normal, opts)
+function isObject(obj) {
+    return typeof obj === "object" && obj !== null
 }

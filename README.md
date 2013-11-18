@@ -15,7 +15,7 @@ Walk a loose jsonml tree with hooks
 ## Example
 
 ```js
-var walk = require("jsonml-walk")
+var Walker = require("jsonml-walk")
 var console = require("console")
 
 // Log all tag names pre-order
