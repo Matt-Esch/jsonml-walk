@@ -7,21 +7,27 @@
   "repository": "git://github.com/Matt-Esch/jsonml-walk.git",
   "main": "index",
   "homepage": "https://github.com/Matt-Esch/jsonml-walk",
-  "contributors": [{
-    "name": "Matt-Esch"
-  }],
+  "contributors": [
+    {
+      "name": "Matt-Esch"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/Matt-Esch/jsonml-walk/issues",
     "email": "matt@mattesch.info"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "tape": "~1.0.2"
+  "dependencies": {
+    "xtend": "~2.1.1"
   },
-  "licenses": [{
-    "type": "MIT",
-    "url": "http://github.com/Matt-Esch/jsonml-walk/raw/master/LICENSE"
-  }],
+  "devDependencies": {
+    "tape": "~2.1.0"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/Matt-Esch/jsonml-walk/raw/master/LICENSE"
+    }
+  ],
   "scripts": {
     "test": "node ./test/index.js",
     "start": "node ./index.js",

@@ -15,38 +15,35 @@ Walk a loose jsonml tree with hooks
 ## Example
 
 ```js
-var walk = require("jsonml-walk")
-var console = require("console")
+var Walker = require("jsonml-walk")
 
-// Log all tag names pre-order
-walk(["div", [
-    ["p", [
-        ["span", ["hello"]],
-        ["b", ["world"]]
-    ]]
-]], {
-    before: function(node, opts) {
-        console.log(node.head)
-    }
-})
-// -> div
-// -> p
-// -> span
-// -> b
-
-// Log all text nodes pre-order
-walk(["div", [
-    ["p", [
-        ["span", ["hello"]],
-        ["b", ["world"]]
-    ]]
-]], {
-    textNode: function(text, opts) {
+var countTagNames = Walker({
+    onNode: function (selector, opts) {
+        var text = selector
+        if (selector === "#text" && opts.value) {
+            text += ":" + opts.value
+        }
         console.log(text)
     }
 })
-// -> hello
-// -> world
+
+var tagNames = countTagNames(["div", {}, [
+    ["p", {}, [
+        ["span", {}, [
+            ["#text", { value: "hello" }, []]
+        ]],
+        ["b", {}, [
+            ["#text", { value: "world" }, []]
+        ]]
+    ]]
+]])
+
+// -> div
+// -> p
+// -> span
+// -> #text:hello
+// -> b
+// -> #text:world
 ```
 
 ## Installation
